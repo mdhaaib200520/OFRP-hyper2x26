@@ -2,14 +2,15 @@ import /init.microtrust.rc
 import /init.vibrator.rc
 
 on init
-    export LD_LIBRARY_PATH /system/lib64:/vendor/lib64:/vendor/lib64/hw:/system/lib64/hw
+    # Expanded paths for OrangeFox shared linker compatibility
+    export LD_LIBRARY_PATH /system/lib64:/vendor/lib64:/vendor/lib64/hw:/system/lib64/hw:/sbin
 
 on late-fs
     # Wait for keymaster
     exec_start wait_for_keymaster
 
-    # Fixed: Mount using recovery's updated fstab path
-    mount_all /etc/recovery.fstab --late
+    # Mount RW partitions which need run fsck
+    mount_all /first_stage_ramdisk/fstab.mt6768 --late
 
 on property:ro.crypto.state=encrypted && property:ro.crypto.type=file
     install_keyring
@@ -30,9 +31,11 @@ service vendor.keymaster-4-1-beanpod /vendor/bin/hw/android.hardware.keymaster@4
     oneshot
     seclabel u:r:recovery:s0
 
+# Core triggers from wulan tree
 on property:crypto.ready=1
     start vendor.keymaster-4-1-beanpod
 
+# Forced trigger to ensure OrangeFox execution frameworks register the services
 on property:hwservicemanager.ready=true
     start vendor.keymaster-4-1-beanpod 
     start vendor.gatekeeper-1-0
@@ -57,6 +60,11 @@ on property:crypto.ready=0
     stop teei_daemon
     stop vendor.keymaster-4-1-beanpod 
     stop vendor.gatekeeper-1-0
+
+# Extra safety catch for OrangeFox decryption loop bypass
+on property:ro.crypto.state=encrypted
+    start vendor.keymaster-4-1-beanpod
+    start vendor.gatekeeper-1-0
 
 # Vibrator service
 on property:twrp.modules.loaded=true 
