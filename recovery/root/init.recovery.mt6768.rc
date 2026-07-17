@@ -8,8 +8,8 @@ on late-fs
     # Wait for keymaster
     exec_start wait_for_keymaster
 
-    # Mount RW partitions which need run fsck
-    mount_all /first_stage_ramdisk/fstab.mt6768 --late
+    # Fixed: Mount using recovery's updated fstab path
+    mount_all /etc/recovery.fstab --late
 
 on property:ro.crypto.state=encrypted && property:ro.crypto.type=file
     install_keyring
@@ -36,6 +36,7 @@ on property:crypto.ready=1
 on property:hwservicemanager.ready=true
     start vendor.keymaster-4-1-beanpod 
     start vendor.gatekeeper-1-0
+    start teei_daemon
 
 on property:ro.crypto.state=unsupported
     stop teei_daemon
