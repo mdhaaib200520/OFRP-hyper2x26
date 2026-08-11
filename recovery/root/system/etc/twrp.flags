@@ -1,44 +1,70 @@
 #<src>              <type> <mnt_point>                                     <flags>
-# Core Encrypted & System Metadata (Fixed block path mapping to md_udc)
+
+
+
 /metadata           ext4   /dev/block/by-name/md_udc                       flags=display="Metadata";backup=1;wrappedkey
-/data	            f2fs   /dev/block/by-name/userdata                     flags=fileencryption=aes-256-xts:aes-256-cts:v2+inlinecrypt_optimized,keydirectory=/metadata/vold/metadata_encryption,wrappedkey
+
+/data               f2fs   /dev/block/by-name/userdata                     flags=fileencryption=aes-256-xts:aes-256-cts:v2+inlinecrypt_optimized,keydirectory=/metadata/vold/metadata_encryption,wrappedkey
+
 /cache              ext4   /dev/block/by-name/rescue                       flags=display="Cache";backup=1;wipeingui;wipeduringfactoryreset
 
-# Boot & Image Flashers
-/boot               emmc   /dev/block/by-name/boot                         flags=display="Boot";slotselect;backup=1;flashimg=1
-/vendor_boot        emmc   /dev/block/by-name/vendor_boot                  flags=display="Vendor Boot";slotselect;backup=1;flashimg=1
-/init_boot          emmc   /dev/block/by-name/init_boot                    flags=display="init Boot";slotselect;backup=1;flashimg=1
-/dtbo               emmc   /dev/block/by-name/dtbo                         flags=display="Dtbo";slotselect;backup=1
 
-# Android Verified Boot (AVB VBMeta)
-/vbmeta             emmc   /dev/block/by-name/vbmeta                       flags=display="VBMeta";slotselect;flashimg=1
+
+
+/boot               emmc   /dev/block/by-name/boot                         flags=display="Boot";slotselect;backup=1;flashimg=1
+
+/vendor_boot        emmc   /dev/block/by-name/vendor_boot                  flags=display="Vendor Boot";slotselect;backup=1;flashimg=1
+
+/init_boot          emmc   /dev/block/by-name/init_boot                    flags=display="Init Boot";slotselect;backup=1;flashimg=1
+
+/dtbo               emmc   /dev/block/by-name/dtbo                         flags=display="DTBO";slotselect;backup=1;flashimg=1
+
+
+
+
+/vbmeta             emmc   /dev/block/by-name/vbmeta                       flags=display="VBMeta";slotselect;backup=1;flashimg=1
+
 /vbmeta_vendor      emmc   /dev/block/by-name/vbmeta_vendor                flags=display="VBMeta Vendor";slotselect;backup=1;flashimg=1
+
 /vbmeta_system      emmc   /dev/block/by-name/vbmeta_system                flags=display="VBMeta System";slotselect;backup=1;flashimg=1
 
-# System Configurations
-/persistent         emmc   /dev/block/by-name/frp                          flags=display="Persistent"
-/para               emmc   /dev/block/by-name/para                         flags=display="Para"
-/misc               emmc   /dev/block/by-name/misc                         flags=display="Misc"
+
+
+/persistent         emmc   /dev/block/by-name/frp                          flags=display="Persistent";backup=1
+
+/para               emmc   /dev/block/by-name/para                         flags=display="Para";backup=1
+
+/misc               emmc   /dev/block/by-name/misc                         flags=display="Misc";backup=1
+
 /logo               emmc   /dev/block/by-name/logo                         flags=display="Logo";backup=1;flashimg=1
-/cust               ext4   /dev/block/by-name/cust                         flags=display="Cust";flashimg=1
 
-# Critical Hardware & Bootloaders
-/lk1                emmc   /dev/block/by-name/lk                           flags=display="Bootloader1 (lk)"
-/lk2                emmc   /dev/block/by-name/lk2                          flags=display="Bootloader2 (lk2)"
+/cust               ext4   /dev/block/by-name/cust                         flags=display="Cust";backup=1;flashimg=1
 
-# MediaTek Security IMEI & NVRAM Backups
-/nvram_image        emmc   /dev/block/by-name/nvram                        flags=backup=1;display="IMEI (NVRAM)";flashimg=1
+
+/lk1                emmc   /dev/block/by-name/lk                           flags=display="Bootloader 1 (LK)";backup=1;flashimg=1
+
+/lk2                emmc   /dev/block/by-name/lk2                          flags=display="Bootloader 2 (LK2)";backup=1;flashimg=1
+
+
+
+/nvram_image        emmc   /dev/block/by-name/nvram                        flags=display="IMEI (NVRAM)";backup=1;flashimg=1
+
 /nvdata             ext4   /dev/block/by-name/nvdata                       flags=backup=1;subpartitionof=/nvram_image
-/nvcfg              ext4   /dev/block/by-name/nvcfg                        flags=backup=1;subpartitionof=/nvram_image
-/persist_image      emmc   /dev/block/by-name/persist                      flags=backup=1;subpartitionof=/nvram_image
-/protect1_image     emmc   /dev/block/by-name/protect1                     flags=backup=1;subpartitionof=/nvram_image
-/protect2_image     emmc   /dev/block/by-name/protect2                     flags=backup=1;subpartitionof=/nvram_image
-/proinfo_image      emmc   /dev/block/by-name/proinfo                      flags=backup=1;subpartitionof=/nvram_image
-/seccfg_image       emmc   /dev/block/by-name/seccfg                       flags=backup=1;subpartitionof=/nvram_image
-#/nvram              auto   /dev/block/by-name/nvram                        flags=display="Nvram (Mount)";nosuid;nodev
-#/persist            ext4   /dev/block/by-name/persist                      flags=display="Persist (Mount)";nosuid;nodev
-#/proinfo            auto   /dev/block/by-name/proinfo                      flags=display="Proinfo (Mount)";nosuid;nodev
 
-# Removable Storage (SDCard & OTG)
-/external_sd        auto   /dev/block/mmcblk1p1 /dev/block/mmcblk1         flags=display="MicroSD";storage;wipeingui;removable
-/usb_otg            auto   /dev/block/sda1 /dev/block/sda /dev/block/sdd1  flags=display="USB OTG";storage;wipeingui;removable
+/nvcfg              ext4   /dev/block/by-name/nvcfg                        flags=backup=1;subpartitionof=/nvram_image
+
+/persist_image      emmc   /dev/block/by-name/persist                      flags=backup=1;subpartitionof=/nvram_image
+
+/protect1_image     emmc   /dev/block/by-name/protect1                     flags=backup=1;subpartitionof=/nvram_image
+
+/protect2_image     emmc   /dev/block/by-name/protect2                     flags=backup=1;subpartitionof=/nvram_image
+
+/proinfo_image      emmc   /dev/block/by-name/proinfo                      flags=backup=1;subpartitionof=/nvram_image
+
+/seccfg_image       emmc   /dev/block/by-name/seccfg                       flags=backup=1;subpartitionof=/nvram_image
+
+
+
+/external_sd        auto   /dev/block/mmcblk1p1 /dev/block/mmcblk1          flags=display="MicroSD";storage;wipeingui;removable
+
+/usb_otg            auto   /dev/block/sda1 /dev/block/sda /dev/block/sdd1   flags=display="USB OTG";storage;wipeingui;removable
