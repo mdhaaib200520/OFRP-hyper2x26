@@ -188,7 +188,7 @@ TW_LOAD_VENDOR_MODULES_EXCLUDE_GKI := true
 TW_LOAD_VENDOR_MODULES := "mt6358-accdet.ko xiaomi_touch.ko lct_tp.ko nt36528_spi.ko ft8057m_spi.ko ft8057p_spi.ko icnl9916_spi.ko"
 
 # Maintainer
-TW_DEVICE_VERSION := 
+TW_DEVICE_VERSION := JK
 
 # OrangeFox Engine Configuration (Forces OFRP to use TWRP's Working Crypto Core)
 FOX_USE_TWRP_RECOVERY_IMAGE_BUILDER := 1
