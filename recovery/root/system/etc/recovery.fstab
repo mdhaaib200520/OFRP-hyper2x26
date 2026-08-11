@@ -1,6 +1,7 @@
 #<src>                                  <mnt_point>            <type> <mnt_flags>             <fs_mgr_flags>
 
-# Dynamic partitions
+
+
 system                                  /system                auto   ro                      wait,slotselect,avb=vbmeta_system,logical
 vendor                                  /vendor                auto   ro                      wait,slotselect,avb,logical
 product                                 /product               auto   ro                      wait,slotselect,avb,logical
@@ -11,76 +12,71 @@ odm_dlkm                                /odm_dlkm              auto   ro        
 system_dlkm                             /system_dlkm           auto   ro                      wait,slotselect,avb,logical
 
 
-# Metadata
+
 /dev/block/by-name/md_udc               /metadata              ext4   noatime,nosuid,nodev,discard    wait,check,formattable
 
 
-# Userdata / FBE
+
 /dev/block/by-name/userdata             /data                  f2fs   noatime,nosuid,nodev,discard,noflush_merge,fsync_mode=nobarrier,reserve_root=134217,resgid=1065,inlinecrypt,gc_merge,atgc    wait,check,formattable,quota,latemount,fileencryption=aes-256-xts:aes-256-cts:v2,keydirectory=/metadata/vold/metadata_encryption
 
 
-# Cache
+
 /dev/block/by-name/rescue               /cache                 ext4   noatime,nosuid,nodev,noauto_da_alloc,discard    wait,check,formattable
 
 
-# Vendor / persistent partitions
-/dev/block/by-name/protect1              /mnt/vendor/protect_f   ext4   noatime,nosuid,nodev,noauto_da_alloc,commit=1,nodelalloc    wait,check,formattable
-/dev/block/by-name/protect2              /mnt/vendor/protect_s   ext4   noatime,nosuid,nodev,noauto_da_alloc,commit=1,nodelalloc    wait,check,formattable
-/dev/block/by-name/nvdata                /mnt/vendor/nvdata      ext4   noatime,nosuid,nodev,noauto_da_alloc,commit=1,nodelalloc    wait,check,formattable
-/dev/block/by-name/nvcfg                 /mnt/vendor/nvcfg       ext4   noatime,nosuid,nodev,noauto_da_alloc,commit=1,nodelalloc    wait,check,formattable
-/dev/block/by-name/persist               /mnt/vendor/persist     ext4   noatime,nosuid,nodev,noauto_da_alloc,commit=1,nodelalloc    wait,check,formattable
 
 
-# External storage
-/devices/platform/11240000.mmc*          auto                  auto   defaults                voldmanaged=sdcard1:auto,encryptable=userdata
-/devices/platform/mt_usb*                auto                  vfat   defaults                voldmanaged=usbotg:auto
+/devices/platform/11240000.mmc*        auto                   auto   defaults                voldmanaged=sdcard1:auto,encryptable=userdata
+/devices/platform/mt_usb*              auto                   vfat   defaults                voldmanaged=usbotg:auto
 
 
-# Miscellaneous partitions
-/dev/block/by-name/frp                   /persistent            emmc   defaults                defaults
-/dev/block/by-name/nvram                 /nvram                 emmc   defaults                defaults
-/dev/block/by-name/proinfo               /proinfo               emmc   defaults                defaults
-/dev/block/by-name/lk                    /bootloader            emmc   defaults                defaults
-/dev/block/by-name/lk2                   /bootloader2           emmc   defaults                defaults
-/dev/block/by-name/misc                  /misc                  emmc   defaults                defaults
-/dev/block/by-name/para                  /para                  emmc   defaults                defaults
-/dev/block/by-name/vendor_boot           /vendor_boot           emmc   defaults                defaults
-/dev/block/by-name/init_boot             /init_boot             emmc   defaults                defaults
 
 
-# Boot / AVB
-/dev/block/by-name/boot                  /boot                  emmc   defaults                first_stage_mount,nofail,slotselect
-/dev/block/by-name/vbmeta_vendor          /vbmeta_vendor         emmc   defaults                first_stage_mount,nofail,slotselect
-/dev/block/by-name/vbmeta_system          /vbmeta_system         emmc   defaults                first_stage_mount,nofail,slotselect,avb=vbmeta
+/dev/block/by-name/frp                  /persistent            emmc   defaults                defaults
+/dev/block/by-name/nvram                /nvram                 emmc   defaults                defaults
+/dev/block/by-name/proinfo              /proinfo               emmc   defaults                defaults
+/dev/block/by-name/lk                   /bootloader            emmc   defaults                defaults
+/dev/block/by-name/lk2                  /bootloader2           emmc   defaults                defaults
+/dev/block/by-name/misc                 /misc                  emmc   defaults                defaults
+/dev/block/by-name/para                 /para                  emmc   defaults                defaults
+/dev/block/by-name/vendor_boot          /vendor_boot           emmc   defaults                defaults
+/dev/block/by-name/init_boot            /init_boot             emmc   defaults                defaults
 
 
-# Other partitions
-/dev/block/by-name/logo                  /logo                  emmc   defaults                defaults
-/dev/block/by-name/expdb                 /expdb                 emmc   defaults                defaults
-/dev/block/by-name/seccfg                /seccfg                emmc   defaults                defaults
 
-/dev/block/by-name/tee1                  /tee1                  emmc   defaults                defaults
-/dev/block/by-name/tee2                  /tee2                  emmc   defaults                defaults
-/dev/block/by-name/tzar                  /tzar                  emmc   defaults                defaults
 
-/dev/block/by-name/scp1                  /scp1                  emmc   defaults                defaults
-/dev/block/by-name/scp2                  /scp2                  emmc   defaults                defaults
+/dev/block/by-name/boot                 /boot                  emmc   defaults                first_stage_mount,nofail,slotselect
+/dev/block/by-name/vbmeta_vendor        /vbmeta_vendor         emmc   defaults                first_stage_mount,nofail,slotselect
+/dev/block/by-name/vbmeta_system        /vbmeta_system         emmc   defaults                first_stage_mount,nofail,slotselect,avb=vbmeta
 
-/dev/block/by-name/sspm_1                /sspm_1                emmc   defaults                defaults
-/dev/block/by-name/sspm_2                /sspm_2                emmc   defaults                defaults
 
-/dev/block/by-name/md1img                /md1img                emmc   defaults                defaults
-/dev/block/by-name/modem                 /modem                 emmc   defaults                defaults
-/dev/block/by-name/md1dsp                /md1dsp                emmc   defaults                defaults
 
-/dev/block/by-name/gz1                   /gz1                   emmc   defaults                defaults
-/dev/block/by-name/gz2                   /gz2                   emmc   defaults                defaults
-/dev/block/by-name/uh                    /uh                    emmc   defaults                defaults
+/dev/block/by-name/logo                 /logo                  emmc   defaults                defaults
+/dev/block/by-name/expdb                /expdb                 emmc   defaults                defaults
+/dev/block/by-name/seccfg               /seccfg                emmc   defaults                defaults
 
-/dev/block/by-name/spmfw                 /spmfw                 emmc   defaults                defaults
+/dev/block/by-name/tee1                 /tee1                  emmc   defaults                defaults
+/dev/block/by-name/tee2                 /tee2                  emmc   defaults                defaults
+/dev/block/by-name/tzar                 /tzar                  emmc   defaults                defaults
 
-/dev/block/by-name/boot_para              /boot_para             emmc   defaults                defaults
-/dev/block/by-name/dtbo                   /dtbo                  emmc   defaults                defaults
-/dev/block/by-name/otp                    /otp                   emmc   defaults                defaults
+/dev/block/by-name/scp1                 /scp1                  emmc   defaults                defaults
+/dev/block/by-name/scp2                 /scp2                  emmc   defaults                defaults
 
-/dev/block/by-name/vbmeta                /vbmeta                emmc   defaults                defaults
+/dev/block/by-name/sspm_1               /sspm_1                emmc   defaults                defaults
+/dev/block/by-name/sspm_2               /sspm_2                emmc   defaults                defaults
+
+/dev/block/by-name/md1img               /md1img                emmc   defaults                defaults
+/dev/block/by-name/modem                /modem                 emmc   defaults                defaults
+/dev/block/by-name/md1dsp               /md1dsp                emmc   defaults                defaults
+
+/dev/block/by-name/gz1                  /gz1                   emmc   defaults                defaults
+/dev/block/by-name/gz2                  /gz2                   emmc   defaults                defaults
+/dev/block/by-name/uh                   /uh                    emmc   defaults                defaults
+
+/dev/block/by-name/spmfw                /spmfw                 emmc   defaults                defaults
+
+/dev/block/by-name/boot_para            /boot_para             emmc   defaults                defaults
+/dev/block/by-name/dtbo                 /dtbo                  emmc   defaults                defaults
+/dev/block/by-name/otp                  /otp                   emmc   defaults                defaults
+
+/dev/block/by-name/vbmeta               /vbmeta                emmc   defaults                defaults
