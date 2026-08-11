@@ -6,21 +6,18 @@
 $(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/aosp_base.mk)
 
-# Installs gsi keys into ramdisk, to boot a developer GSI with verified boot.
+# Install GSI keys into ramdisk
 $(call inherit-product, $(SRC_TARGET_DIR)/product/gsi_keys.mk)
 
 # Configure Virtual A/B
 $(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota.mk)
-
-# Configure virtual_ab compression.mk
 $(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota/compression.mk)
-
-# Configure launch_with_vendor_ramdisk.mk
 $(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota/launch_with_vendor_ramdisk.mk)
 
-PRODUCT_PROPERTY_OVERRIDES += ro.twrp.vendor_boot=true
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.twrp.vendor_boot=true
 
-# Dynamic
+# Dynamic partitions
 PRODUCT_USE_DYNAMIC_PARTITIONS := true
 
 # Virtual A/B
@@ -77,6 +74,7 @@ PRODUCT_PACKAGES += \
 
 # Fastbootd
 TW_INCLUDE_FASTBOOTD := true
+
 PRODUCT_PACKAGES += \
     android.hardware.fastboot@1.0-impl-mock \
     fastbootd
@@ -108,6 +106,7 @@ TW_RECOVERY_ADDITIONAL_RELINK_LIBRARY_FILES += \
     $(TARGET_OUT_SHARED_LIBRARIES)/libkeymaster41.so \
     $(TARGET_OUT_SHARED_LIBRARIES)/libpuresoftkeymasterdevice.so \
     $(TARGET_OUT_SHARED_LIBRARIES)/libkeymaster_messages.so
+
 # OrangeFox Recovery Configuration
 PRODUCT_PACKAGES += \
     orangefox \
@@ -115,7 +114,7 @@ PRODUCT_PACKAGES += \
     init.recovery.usb.rc \
     init.recovery.mt6768.rc.recovery
 
-# Copy necessary OrangeFox init scripts into recovery ramdisk
+# Copy OrangeFox init scripts into recovery ramdisk
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/recovery/fox/init.recovery.mt6768.rc:$(TARGET_COPY_OUT_RECOVERY)/root/init.recovery.mt6768.rc \
     $(LOCAL_PATH)/recovery/fox/init.recovery.usb.rc:$(TARGET_COPY_OUT_RECOVERY)/root/init.recovery.usb.rc \
@@ -127,8 +126,13 @@ OF_USE_GREEN_LED := 0
 OF_NO_TREBLE_COMPATIBILITY_CHECK := 1
 OF_PATCH_AVB20 := 1
 OF_CLASSIC_LEDS_FUNCTION := 1
+
+# Keep encrypted-device patching disabled
 OF_DONT_PATCH_ENCRYPTED_DEVICE := 1
-OF_SKIP_FBE_DECRYPTION := 1
+
+# Do NOT skip FBE decryption
+# OF_SKIP_FBE_DECRYPTION := 1
+
 OF_IGNORE_LOGICAL_MOUNT_ERRORS := true
 OF_KEEP_FORCED_ENCRYPTION := true
 OF_SUPPORT_ALL_BLOCK_OTA_UPDATES := true
