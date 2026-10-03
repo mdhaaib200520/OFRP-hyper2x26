@@ -2,7 +2,13 @@ import /init.microtrust.rc
 import /init.vibrator.rc
 
 on init
-    export LD_LIBRARY_PATH /system/lib64:/vendor/lib64:/vendor/lib64/hw:/system/lib64/hw
+    # Expanded paths for OrangeFox shared linker compatibility
+    export LD_LIBRARY_PATH /system/lib64:/vendor/lib64:/vendor/lib64/hw:/system/lib64/hw:/sbin
+    
+    # USB Properties from working TWRP "V"
+    setprop sys.usb.configfs 1
+    setprop sys.usb.controller "musb-hdrc"
+    setprop sys.usb.ffs.aio_compat 0
 
 on late-fs
     # Wait for keymaster
@@ -11,31 +17,41 @@ on late-fs
     # Mount RW partitions which need run fsck
     mount_all /first_stage_ramdisk/fstab.mt6768 --late
 
+on fs && property:ro.debuggable=0
+    start adbd
+
 on property:ro.crypto.state=encrypted && property:ro.crypto.type=file
     install_keyring
 
+# ----- Gatekeeper -----
 service vendor.gatekeeper-1-0 /vendor/bin/hw/android.hardware.gatekeeper@1.0-service
     interface android.hardware.gatekeeper@1.0::IGatekeeper default
     user root
-    group root
-    disabled
-    seclabel u:r:recovery:s0
-
-service vendor.keymaster-4-1-beanpod /vendor/bin/hw/android.hardware.keymaster@4.1-service.beanpod
-    interface android.hardware.keymaster@4.0::IKeymasterDevice default
-    interface android.hardware.keymaster@4.1::IKeymasterDevice default
-    user root
-    group root drmrpc
+    group root system
     disabled
     oneshot
     seclabel u:r:recovery:s0
 
+# ----- Keymaster (Beanpod variant) -----
+service vendor.keymaster-4-1-beanpod /vendor/bin/hw/android.hardware.keymaster@4.1-service.beanpod
+    interface android.hardware.keymaster@4.0::IKeymasterDevice default
+    interface android.hardware.keymaster@4.1::IKeymasterDevice default
+    user root
+    group root drmrpc system
+    priority -20
+    disabled
+    oneshot
+    seclabel u:r:recovery:s0
+
+# Core triggers from wulan tree
 on property:crypto.ready=1
     start vendor.keymaster-4-1-beanpod
 
+# Forced trigger to ensure OrangeFox execution frameworks register the services
 on property:hwservicemanager.ready=true
     start vendor.keymaster-4-1-beanpod 
     start vendor.gatekeeper-1-0
+    start teei_daemon
 
 on property:ro.crypto.state=unsupported
     stop teei_daemon
@@ -57,6 +73,11 @@ on property:crypto.ready=0
     stop vendor.keymaster-4-1-beanpod 
     stop vendor.gatekeeper-1-0
 
+# Extra safety catch for OrangeFox decryption loop bypass
+on property:ro.crypto.state=encrypted
+    start vendor.keymaster-4-1-beanpod
+    start vendor.gatekeeper-1-0
+
 # Vibrator service
 on property:twrp.modules.loaded=true 
     start vendor.vibrator-default
@@ -64,3 +85,42 @@ on property:twrp.modules.loaded=true
 on boot
     start boot-hal-1-2
     start health-hal-2-1
+    start vendor.keymaster-4-1-beanpod
+    start vendor.gatekeeper-1-0
+
+    # OrangeFox ConfigFS Manual Setup (Combines TWRP "V" base with OrangeFox requirements)
+    mount configfs none /config
+    mkdir /config/usb_gadget/g1 0770 shell shell
+    write /config/usb_gadget/g1/idVendor 0x2717
+    write /config/usb_gadget/g1/idProduct 0x201d
+    mkdir /config/usb_gadget/g1/strings/0x409 0770 shell shell
+    write /config/usb_gadget/g1/strings/0x409/serialnumber ${ro.serialno}
+    write /config/usb_gadget/g1/strings/0x409/manufacturer ${ro.product.manufacturer}
+    write /config/usb_gadget/g1/strings/0x409/product ${ro.product.model}
+    mkdir /config/usb_gadget/g1/configs/b.1 0770 shell shell
+    mkdir /config/usb_gadget/g1/configs/b.1/strings/0x409 0770 shell shell
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "mtp_adb"
+    write /config/usb_gadget/g1/configs/b.1/MaxPower 500
+    mkdir /config/usb_gadget/g1/functions/mtp.gs0
+    mkdir /config/usb_gadget/g1/functions/ffs.adb
+    setprop sys.usb.config mtp,adb
+
+# OrangeFox USB State Handlers
+on property:sys.usb.config=none
+    write /config/usb_gadget/g1/UDC "none"
+    stop adbd
+    setprop sys.usb.state ${sys.usb.config}
+
+on property:sys.usb.config=mtp,adb
+    start adbd
+
+on property:sys.usb.ffs.ready=1 && property:sys.usb.config=mtp,adb
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "mtp_adb"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    write /config/usb_gadget/g1/idVendor 0x2717
+    write /config/usb_gadget/g1/idProduct 0x201d
+    symlink /config/usb_gadget/g1/functions/mtp.gs0 /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f2
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
