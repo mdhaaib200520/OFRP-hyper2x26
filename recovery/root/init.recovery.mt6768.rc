@@ -4,6 +4,11 @@ import /init.vibrator.rc
 on init
     # Expanded paths for OrangeFox shared linker compatibility
     export LD_LIBRARY_PATH /system/lib64:/vendor/lib64:/vendor/lib64/hw:/system/lib64/hw:/sbin
+    
+    # USB Properties from working TWRP "V"
+    setprop sys.usb.configfs 1
+    setprop sys.usb.controller "musb-hdrc"
+    setprop sys.usb.ffs.aio_compat 0
 
 on late-fs
     # Wait for keymaster
@@ -12,21 +17,28 @@ on late-fs
     # Mount RW partitions which need run fsck
     mount_all /first_stage_ramdisk/fstab.mt6768 --late
 
+on fs && property:ro.debuggable=0
+    start adbd
+
 on property:ro.crypto.state=encrypted && property:ro.crypto.type=file
     install_keyring
 
+# ----- Gatekeeper -----
 service vendor.gatekeeper-1-0 /vendor/bin/hw/android.hardware.gatekeeper@1.0-service
     interface android.hardware.gatekeeper@1.0::IGatekeeper default
     user root
-    group root
+    group root system
     disabled
+    oneshot
     seclabel u:r:recovery:s0
 
+# ----- Keymaster (Beanpod variant) -----
 service vendor.keymaster-4-1-beanpod /vendor/bin/hw/android.hardware.keymaster@4.1-service.beanpod
     interface android.hardware.keymaster@4.0::IKeymasterDevice default
     interface android.hardware.keymaster@4.1::IKeymasterDevice default
     user root
-    group root drmrpc
+    group root drmrpc system
+    priority -20
     disabled
     oneshot
     seclabel u:r:recovery:s0
@@ -73,8 +85,10 @@ on property:twrp.modules.loaded=true
 on boot
     start boot-hal-1-2
     start health-hal-2-1
-    
-    # MTK ConfigFS USB Setup for MTP/ADB
+    start vendor.keymaster-4-1-beanpod
+    start vendor.gatekeeper-1-0
+
+    # OrangeFox ConfigFS Manual Setup (Combines TWRP "V" base with OrangeFox requirements)
     mount configfs none /config
     mkdir /config/usb_gadget/g1 0770 shell shell
     write /config/usb_gadget/g1/idVendor 0x2717
@@ -89,11 +103,9 @@ on boot
     write /config/usb_gadget/g1/configs/b.1/MaxPower 500
     mkdir /config/usb_gadget/g1/functions/mtp.gs0
     mkdir /config/usb_gadget/g1/functions/ffs.adb
-    setprop sys.usb.configfs 1
-    # Note: If MTP fails, check your stock init.mt6768.usb.rc for the correct controller name
-    setprop sys.usb.controller "musb-hdrc"
+    setprop sys.usb.config mtp,adb
 
-# USB Trigger Handlers
+# OrangeFox USB State Handlers
 on property:sys.usb.config=none
     write /config/usb_gadget/g1/UDC "none"
     stop adbd
